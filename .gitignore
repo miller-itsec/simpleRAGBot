@@ -2,3 +2,6 @@
 custom_documents
 .idea
 /get-pip.py
+/*.pkl
+/db_vectors
+/__pycache__

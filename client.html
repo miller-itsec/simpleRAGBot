@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot powered by simpleRAGBot v1.0.0</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #212121; /* Dark grey background */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center children vertically */
+            align-items: center; /* Center children horizontally */
+            height: 100vh;
+        }
+        header#chatbotTitle {
+            width: 100%;
+            text-align: center;
+            font-size: 1.5em;
+            color: white;
+            margin-bottom: 20px;
+            padding: 10px 0;
+        }
+        #chatContainer {
+            flex-direction: column;
+            display: flex;
+            padding: 10px;
+            overflow-y: auto; /* Enables scrolling */
+            width: 100%;
+            max-width: 40em; /* Narrower max width for better appearance */
+            margin-bottom: 10px; /* Space from bottom */
+        }
+        #chatInputContainer {
+            width: 100%;
+            max-width: 40em; /* Keep input container same max width as chat */
+            margin: 0 10px; /* Margin on the sides */
+            box-sizing: border-box; /* Include margin in width calculation */
+        }
+        #textInput {
+            width: calc(100% - 20px); /* Full width with padding */
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .chatMessage {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+            word-wrap: break-word; /* Prevents long text from overflowing */
+        }
+        .dropdown-toggle {
+            cursor: pointer;
+            color: #007bff; /* Bootstrap's link color for consistency */
+            margin-top: 10px;
+        }
+
+        .dropdown-toggle:hover {
+            text-decoration: underline;
+        }
+
+        #sourceList {
+            margin-top: 10px;
+        }
+        .userMessage {
+            align-self: flex-end;
+            background-color: #d1e7ff;
+        }
+        .systemMessage {
+            align-self: flex-start;
+        }
+        .infoText {
+            color: #ccc;
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header id="chatbotTitle">Custom chatbot powered by simpleRAGBot v1.0.0</header>
+    <div id="chatContainer"></div> <!-- Chat messages will be displayed here -->
+    <div id="chatInputContainer">
+        <input type="text" id="textInput" placeholder="Type your message..." autofocus>
+        <p class="infoText">Large-language models can make mistakes. Consider checking important information.</p>
+    </div>
+
+    <script>
+        const inputField = document.getElementById('textInput');
+        const chatContainer = document.getElementById('chatContainer');
+        let timeout = null;
+        let responseCounter = 0; // Global counter
+        let productNames = {};
+        let modelStats = {};
+
+        function appendMessage(content, author = 'user') {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('chatMessage', author === 'user' ? 'userMessage' : 'systemMessage');
+            msgDiv.innerHTML = content; // Allow HTML content
+            chatContainer.appendChild(msgDiv); // Append new message at the bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to the bottom
+        }
+
+        async function fetchSystemInfo() {
+            try {
+                const response = await fetch('http://localhost:5000/system');
+                const data = await response.json();
+
+                // Construct and set the title
+                const title = `${data.app_name} v${data.app_version} powered by ${data.model_name}`;
+                document.getElementById('chatbotTitle').innerText = title;
+
+                // Store product names and model stats
+                productNames = data.product_names;
+                modelStats = data.model_stats;
+
+                // Display initial messages
+                displayInitialMessages();
+            } catch (error) {
+                console.error('Error fetching system info:', error);
+            }
+        }
+
+        function displayInitialMessages() {
+            let productNamesList = Object.keys(productNames).join(", ");
+            appendMessage(`How can I help you? I know a lot about: ${productNamesList}`, 'system');
+
+            let statsMessage = `Model Stats: Trainable Parameters: ${modelStats.trainable_model_params}, Total Parameters: ${modelStats.all_model_params}, Trainable Percentage: ${modelStats.percentage_trainable}`;
+            appendMessage(statsMessage, 'system');
+        }
+
+        window.onload = function() {
+            fetchSystemInfo();
+        };
+        
+        inputField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                appendMessage(inputField.value); // Show user's message
+                submitPrompt(inputField.value);
+                inputField.value = '';
+            }
+        });
+
+        async function submitPrompt(prompt) {
+            appendMessage('Processing...', 'system');
+            const res = await fetch('http://localhost:5000/prompt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
+
+            const data = await res.json();
+            timeout = setTimeout(() => {
+                appendMessage('Processing timed out. Try again.', 'system');
+            }, 120000); // 2 minutes timeout
+
+            pollForResult(data.prompt_id);
+        }
+
+        function displayResult(formattedData) {
+            // Replace newline characters with HTML line breaks to format the text
+            const textWithBreaks = formattedData.formattedText.replace(/\n/g, '<br>');
+
+            // Separate and sort file sources and URL sources
+            let fileSources = formattedData.sources.filter(source => !source.startsWith("http")).sort();
+            let urlSources = formattedData.sources.filter(source => source.startsWith("http")).sort();
+
+            // Create a toggleable section for sources
+            responseCounter++; // Increment the global counter
+            let sourcesHtml = `<div style="margin-top: 10px;">
+                                   <a href="#" onclick="toggleSourcesVisibility(${responseCounter}); return false;" id="sourceToggle${responseCounter}" style="text-decoration: none;">Show Sources ▼</a>
+                                   <div id="sourceList${responseCounter}" style="display: none;">
+                                       <br><strong>File Sources:</strong><br>${fileSources.join('<br>')}<br>
+                                       <br><strong>URL Sources:</strong><br>${urlSources.map(url => `<a href="${url}" target="_blank">${url}</a>`).join('<br>')}
+                                   </div>
+                               </div>`;
+
+            // Append the response text and sources HTML together to the chat
+            const fullMessageHtml = textWithBreaks + sourcesHtml;
+            appendMessage(fullMessageHtml, 'system');
+        }
+
+        // Ensure the toggleSourcesVisibility function is updated to work with unique IDs
+        function toggleSourcesVisibility(responseNumber) {
+            const sourceList = document.getElementById('sourceList' + responseNumber);
+            const sourceToggle = document.getElementById('sourceToggle' + responseNumber);
+            if (sourceList.style.display === 'none') {
+                sourceList.style.display = 'block';
+                sourceToggle.innerHTML = 'Hide Sources ▲';
+            } else {
+                sourceList.style.display = 'none';
+                sourceToggle.innerHTML = 'Show Sources ▼';
+            }
+        }
+
+        function formatResponse(data) {
+            try {
+                // Parse the inner JSON string in the response field
+                const innerData = JSON.parse(data.response);
+                let formattedText = innerData.text || 'No response text';
+                let sourceSet = new Set();  // Use a Set to store unique sources
+
+                if (innerData.context && Array.isArray(innerData.context)) {
+                    innerData.context.forEach(item => {
+                        if (item.metadata && item.metadata.source) {
+                            sourceSet.add(item.metadata.source); // Add to the set for deduplication
+                        }
+                    });
+                }
+                
+                let sources = Array.from(sourceSet); // Convert the Set back to an Array for display
+                return { formattedText, sources };
+            } catch (error) {
+                console.error("Error parsing inner JSON: ", error);
+                return { formattedText: 'Error in processing the response', sources: [] };
+            }
+        }
+
+        async function pollForResult(promptId) {
+            let status = '';
+            let isProcessingTimeoutReached = false;
+
+            // Set a timeout for showing an extended processing message after 60 seconds
+            const processingMessageTimeout = setTimeout(() => {
+                appendMessage("It's taking longer than expected. Please wait...", 'system');
+            }, 60000); // 60 seconds
+
+            // Set a timeout for total processing
+            const totalProcessingTimeout = setTimeout(() => {
+                if (status !== 'SUCCESS' && status !== 'FAILED') {
+                    appendMessage('Processing timed out. Try again.', 'system');
+                    status = 'TIMEOUT';
+                    isProcessingTimeoutReached = true;
+                }
+            }, 120000); // 120 seconds
+
+            while (!status && !isProcessingTimeoutReached) {
+                await new Promise(r => setTimeout(r, 1000)); // Poll every second
+                const res = await fetch('http://localhost:5000/result?prompt_id=' + promptId);
+                const data = await res.json();
+                status = data.status;
+
+                if (status === 'SUCCESS') {
+                    clearTimeout(processingMessageTimeout); 
+                    clearTimeout(totalProcessingTimeout);
+                    const formattedData = formatResponse(data);
+                    displayResult(formattedData);
+                    break; // Exit the loop on success
+                } else if (status === 'FAILED' || status === 'TIMEOUT') {
+                    clearTimeout(processingMessageTimeout);
+                    clearTimeout(totalProcessingTimeout);
+                    appendMessage('Failed to process.', 'system');
+                    break; // Exit the loop on failure or timeout
+                }
+                // Continue polling if status is 'IN_QUEUE' or 'IN_PROGRESS'
+            }
+        }
+    </script>
+</body>
+</html>
