@@ -13,6 +13,12 @@ Retrieval-Augmented Generation (RAG) combines the benefits of both retrieval-bas
 - **Web Server and CLI Support**: Offers both a Flask-based API for web interaction and a command-line interface for direct usage.
 - **Configurable Multi-threaded System**: Ensures efficient prompt processing and response generation.
 
+### Example:
+
+![Example](example.png?raw=true "Example output")
+
+![Example](example2.png?raw=true "Example output")
+
 ## Installation
 
 ### Prerequisites
@@ -81,7 +87,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 Jan Miller - [@miller_itsec](https://twitter.com/miller_itsec)
 
-### Example:
-
-![Example](example.png?raw=true "Example output")
-![Example](example2.png?raw=true "Example output")
