@@ -13,12 +13,19 @@ Retrieval-Augmented Generation (RAG) combines the benefits of both retrieval-bas
 - **Web Server and CLI Support**: Offers both a Flask-based API for web interaction and a command-line interface for direct usage.
 - **Configurable Multi-threaded System**: Ensures efficient prompt processing and response generation.
 
+### Example:
+
+![Example](example.png?raw=true "Example output")
+
+![Example](example2.png?raw=true "Example output")
+
 ## Installation
 
 ### Prerequisites
 Ensure you have the following installed:
 - Python 3.8+
 - Pip (Python package installer)
+- LLM model (by default https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2)
 
 ### Setup
 1. Clone the repository:
@@ -81,7 +88,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 Jan Miller - [@miller_itsec](https://twitter.com/miller_itsec)
 
-### Example:
-
-![Example](example.png?raw=true "Example output")
-![Example](example2.png?raw=true "Example output")
