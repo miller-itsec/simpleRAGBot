@@ -227,21 +227,18 @@
             let status = '';
             let isProcessingTimeoutReached = false;
 
-            // Set a timeout for showing an extended processing message after 60 seconds
             const processingMessageTimeout = setTimeout(() => {
                 appendMessage("It's taking longer than expected. Please wait...", 'system');
             }, 60000); // 60 seconds
 
-            // Set a timeout for total processing
             const totalProcessingTimeout = setTimeout(() => {
-                if (status !== 'SUCCESS' && status !== 'FAILED') {
+                if (status === '' || status === 'IN_QUEUE' || status === 'IN_PROGRESS') {
                     appendMessage('Processing timed out. Try again.', 'system');
-                    status = 'TIMEOUT';
                     isProcessingTimeoutReached = true;
                 }
             }, 120000); // 120 seconds
 
-            while (!status && !isProcessingTimeoutReached) {
+            while (!isProcessingTimeoutReached) {
                 await new Promise(r => setTimeout(r, 1000)); // Poll every second
                 const res = await fetch('http://localhost:5000/result?prompt_id=' + promptId);
                 const data = await res.json();
@@ -253,13 +250,18 @@
                     const formattedData = formatResponse(data);
                     displayResult(formattedData);
                     break; // Exit the loop on success
-                } else if (status === 'FAILED' || status === 'TIMEOUT') {
+                } else if (status === 'FAILED') {
                     clearTimeout(processingMessageTimeout);
                     clearTimeout(totalProcessingTimeout);
                     appendMessage('Failed to process.', 'system');
-                    break; // Exit the loop on failure or timeout
+                    break; // Exit the loop on failure
                 }
-                // Continue polling if status is 'IN_QUEUE' or 'IN_PROGRESS'
+                // If status is 'IN_QUEUE' or 'IN_PROGRESS', the loop will continue
+            }
+
+            // Check if the loop exited due to a timeout
+            if (status !== 'SUCCESS' && status !== 'FAILED') {
+                appendMessage('Failed to process: Timeout reached.', 'system');
             }
         }
     </script>

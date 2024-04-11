@@ -27,7 +27,7 @@ ENABLE_WEBSERVER = True  # Set to False if you don't want to run the web server
 WEBSERVER_PORT = 5000  # The port on which the Flask server will run
 WEBSERVER_RATE_LIMIT = "1 per minute"
 WEBSERVER_MAX_WORKERS = 2
-TASK_PROCESSING_TIMEOUT = 120
+TASK_PROCESSING_TIMEOUT = 180
 
 # User-input on the console
 ENABLE_COMMANDLINE = True
