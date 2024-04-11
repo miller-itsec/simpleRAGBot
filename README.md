@@ -25,6 +25,7 @@ Retrieval-Augmented Generation (RAG) combines the benefits of both retrieval-bas
 Ensure you have the following installed:
 - Python 3.8+
 - Pip (Python package installer)
+- LLM model (by default https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2)
 
 ### Setup
 1. Clone the repository:
