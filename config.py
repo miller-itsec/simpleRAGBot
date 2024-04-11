@@ -17,7 +17,7 @@ Usage Instructions:
 - Run the script to initialize the RAG Bot and optionally activate the web server.
 - Interact with the bot through the CLI or API endpoints as per your setup.
 
-(c) 2024 Jan Miller (@miller_itsec) for OPSWAT, Inc. All rights reserved.
+(c) 2024 Jan Miller (@miller_itsec) affiliated with OPSWAT, Inc. All rights reserved.
 """
 import os
 current_directory = os.getcwd()

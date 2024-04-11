@@ -2,7 +2,7 @@
 """
 Common functions used in simpleRAGBot
 
-(c) Jan Miller (@miller_itsec) for OPSWAT, Inc.
+(c) 2024 Jan Miller (@miller_itsec) affiliated with OPSWAT, Inc. All rights reserved.
 """
 import re
 from bs4 import BeautifulSoup

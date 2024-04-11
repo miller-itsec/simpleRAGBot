@@ -14,7 +14,7 @@ Features:
 Usage:
 Directly execute this script after configuring through 'config.py'. It supports both a command-line interface and a Flask-based API for external prompts.
 
-(c) 2024 Jan Miller (@miller_itsec) for OPSWAT, Inc. All rights reserved.
+(c) 2024 Jan Miller (@miller_itsec) affiliated with OPSWAT, Inc. All rights reserved.
 """
 import pickle
 import sys
