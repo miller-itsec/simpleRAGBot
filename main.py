@@ -45,6 +45,7 @@ import langchain
 from langchain.retrievers import EnsembleRetriever
 from langchain_community.cache import InMemoryCache
 from langchain_community.retrievers.bm25 import BM25Retriever
+from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.runnables.utils import Input
 
@@ -178,7 +179,7 @@ async def load_and_transform_url(loader, url, delay=0.0):
         html_content = await loader.ascrape_playwright(url)
         html_content = strip_html(html_content)
         html_content = re.sub(r'[\s]+', ' ', html_content)  # Remove excessive whitespace
-        logger.debug(f"Extracted Text from URL:\n{html_content[:500]}...")  # Print the first 500 characters
+        logger.info(f"Extracted Text from URL:\n{html_content[:500]}...")  # Print the first 500 characters
         return Document(page_content=html_content, metadata={"source": url})
     except Exception as e:
         logger.exception("Failed to load and transform URL: " + url, exc_info=e)
@@ -258,7 +259,8 @@ class DynamicPromptRunnable(Runnable):
         context = input.get('context', '')
         question = input.get('question', '')
         product_instructions = get_product_instructions(question)
-        return self.llm_chain.invoke({"product_instructions": product_instructions, "context": context, "question": question})
+        return self.llm_chain.invoke(
+            {"product_instructions": product_instructions, "context": context, "question": question})
 
 
 def save_bm25_index(bm25_retriever):
@@ -338,8 +340,6 @@ def main():
         url_docs = []
 
         if len(CUSTOM_URLS) > 0:
-            import nest_asyncio
-            nest_asyncio.apply()
             logger.info(f"Loading {len(CUSTOM_URLS)} custom URLs ...")
             url_docs = asyncio.run(process_urls(CUSTOM_URLS))
             logger.info(f"Number of URLs loaded: {len(url_docs)}")
@@ -429,7 +429,7 @@ def main():
             f"Starting webserver on localhost:{WEBSERVER_PORT} (Workers: {WEBSERVER_MAX_WORKERS}, Rate limit: {WEBSERVER_RATE_LIMIT})")
         app = Flask(get_app_name())
         CORS(app)
-        limiter = Limiter(get_app_name, request_identifier=get_remote_address, default_limits=["1 per minute"])
+        limiter = Limiter(app, key_func=get_remote_address, default_limits=["1 per minute"])
         executor = ThreadPoolExecutor(max_workers=WEBSERVER_MAX_WORKERS)  # Adjust max_workers as needed
         prompt_status = {}
         prompt_responses = {}
@@ -500,7 +500,7 @@ def main():
 
     if ENABLE_COMMANDLINE:
         def run_command_line_interface():
-            time.sleep(2) # Wait two seconds
+            time.sleep(2)  # Wait two seconds
             # Command line interaction loop
             while True:
                 try:

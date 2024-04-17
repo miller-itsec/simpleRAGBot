@@ -25,6 +25,8 @@ def convert_to_dict(obj):
         return {k: convert_to_dict(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [convert_to_dict(item) for item in obj]
+    elif isinstance(obj, str):
+        return {'text': obj}  # Convert string to a dictionary with a 'text' key
     else:
         return obj
 
