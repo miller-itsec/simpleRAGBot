@@ -97,7 +97,7 @@ class DynamicPromptRunnable(Runnable):
         filtered_context = [doc for doc in context if
                             doc.metadata.get('relevance_score', 0) >= RELEVANCE_SCORE_THRESHOLD]
         question = input.get('question', '')
-        product_instructions = get_product_instructions(question)
+        product_instructions = get_product_instructions(question) if len(filtered_context) > 0 else ''
         payload = {"product_instructions": product_instructions, "context": filtered_context, "question": question}
         return self.llm_chain.invoke(payload)
 
