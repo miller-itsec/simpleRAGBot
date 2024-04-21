@@ -4,6 +4,7 @@ flask-limiter==3.5.1
 googlesearch-python==1.2.3
 playwright==1.43.0
 nest-asyncio==1.5.5
+numpy==1.26.4
 html2text==2020.1.16
 tqdm==4.64.0
 torch==2.2.2+cu121
@@ -11,3 +12,4 @@ transformers==4.39.3
 langchain==0.1.14
 langchain-community
 rank_bm25==0.2.2
+flashrank==0.2.0

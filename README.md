@@ -8,6 +8,7 @@ Retrieval-Augmented Generation (RAG) combines the benefits of both retrieval-bas
 
 ## Features
 - **Asynchronous Web Scraping**: For dynamic and varied content acquisition.
+- **Document Summarization**: Utilizes the `facebook/bart-large-cnn` model to condense large documents into pertinent summaries.
 - **Document Processing and Indexing**: Using FAISS (Facebook AI Similarity Search) for rapid retrieval and effective segmentation.
 - **RAG Chain with Mistral-7B-Instruct-v0.2 Model**: Enriched response generation leveraging a powerful generative model.
 - **Web Server and CLI Support**: Offers both a Flask-based API for web interaction and a command-line interface for direct usage.

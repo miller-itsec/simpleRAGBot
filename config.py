@@ -35,6 +35,7 @@ ENABLE_COMMANDLINE = True
 # Set up custom data sources
 CUSTOM_PDFS = os.path.join(current_directory, "custom_documents")
 CUSTOM_MARKDOWN = os.path.join(current_directory, "custom_documents")
+DOWNLOAD_CUSTOM_URLS = True
 CUSTOM_URLS = ["https://www.opswat.com/products/metadefender/sandbox",
                 "https://www.opswat.com/blog/getting-started-with-opswat-filescan-sandbox-sandboxing-made-easy",
                 "https://www.opswat.com/blog/opswat-filescan-sandbox-v1-9-1-new-updates-and-releases",
@@ -42,17 +43,27 @@ CUSTOM_URLS = ["https://www.opswat.com/products/metadefender/sandbox",
                 "https://www.opswat.com/blog/introducing-opswat-metadefender-sandbox-v1-9-3",
                 "https://www.filescan.io/api/docs",
                 "https://www.filescan.io/help/faq"]
+PERFORM_CUSTOM_GOOGLE_QUERIES = True
 CUSTOM_GOOGLE_QUERIES = ["MetaDefender Sandbox", "OPSWAT Products", "OPSWAT Blog", "OPSWAT"]
-CHUNK_SIZE = 512
+CHUNK_SIZE = 1024
 CHUNK_OVERLAP = 128
+# Delete small files in the CUSTOM_* directories
+CLEAN_SMALL_CUSTOM_DOCUMENTS = False
+CLEAN_SMALL_CUSTOM_DOCUMENTS_THRESHOLD_BYTES = 1024
+SUMMARIZE_LARGE_DOCUMENTS = True
+SUMMARIZE_LARGE_DOCUMENTS_THRESHOLD = 10 * 1024  # Summarize any document using facebook/bart-large-cnn
+SKIP_URL_SUMMARY = True
+CUSTOM_URL_SUMMARY_STORAGE = os.path.join(current_directory, "custom_urls")
+SUMMARIZE_USE_CACHE = True
+COMPANY_NAME = "OPSWAT"
 PRODUCT_NAMES = {
     "MetaDefender Sandbox": ["Filescan Sandbox", "OPSWAT Sandbox"],
     # Add other products and their synonyms here
     # "Another Product": ["Synonym1", "Synonym2"]
 }
-# Define prompt template
+# Define prompt template (make sure it matches the model's expected input format and you use {product_instructions}, {context} and {question})
 PROMPT_TEMPLATE = """
-### [INST] Product description: 
+### [INST] Product description:
 {product_instructions}
 
 CONTEXT ONLY for questions relating to the product:
@@ -61,33 +72,31 @@ CONTEXT ONLY for questions relating to the product:
 QUESTION:
 {question}
 
-In your response, it is okay to ignore the context if it is unrelated, as it was provided just in case the question refers to it.
-If you do not include context related data, do not mention that in your response. Omit sentences like 'The given context does not 
-provide any information regarding ... Therefore, the response will focus only on the question at hand.'
+In your response, provide clear, concise, and relevant information. Summarize the key findings in a list format, with a proper intro and outro.
 
-Please offer clear, concise, and relevant information and summarize the key findings in a list, with a proper intro and outro.
-
-If the question is unrelated to the product, please ask for a product related question listing the product names.
+If the question is unrelated to the product, ask for a product-related question by listing the product names without mentioning the context's relevance or lack thereof.
 
 [/INST]
 """
 
 # Set up directories, models and search parameters (advanced)
-MODEL_PATH = os.path.join(current_directory, "Mistral-7B-Instruct-v0.2")
+MODEL_DIR = "E:\\LLM\\models"
+MODEL_PATH = os.path.join(MODEL_DIR, "mistral-7b-instruct-v0.2-bnb-4bit")  # https://huggingface.co/unsloth/mistral-7b-instruct-v0.2-bnb-4bit
 MODEL_TEMPERATURE = 0.25  # Lower temperature reduces randomness
 EMBEDDINGS_MODEL = "sentence-transformers/all-mpnet-base-v2"
 # Configure the retriever with Maximal Marginal Relevance (MMR) for a good balance of relevance and diversity.
 # Here, 'k' represents the number of documents to retrieve, and 'lambda_mult' adjusts the balance between relevance and diversity.
 # Setting e.g. 'lambda_mult' to 0.5 gives equal importance to both, with a lower value corresponding to maximum diversity.
 RETRIEVER_FAISS_SEARCH_TYPE = "mmr"
-RETRIEVER_FAISS_SEARCH_ARGS = {'k': 10, 'lambda_mult': 0.75}
-MAX_OUTPUT_LENGTH = 512
-VECTOR_USE_CACHE = True
+RETRIEVER_FAISS_SEARCH_ARGS = {'k': 50, 'lambda_mult': 0.65}
+MAX_OUTPUT_LENGTH = 256
+VECTOR_USE_CACHE = False
 VECTOR_CACHE_TTL = 60  # Enforce vector db rebuild, if too old (in minutes)
 VECTOR_STORAGE_FOLDER = "db_vectors"
 VECTOR_INDEX_FILE = os.path.join(VECTOR_STORAGE_FOLDER, "index.faiss")
 BM25_CACHE_FILE = "bm25_index.pkl"
-ENSEMBLE_RETRIEVER_WEIGHTS = [0.25, 0.75] #[BM25, faiss]
+ENSEMBLE_RETRIEVER_WEIGHTS = [0.25, 0.75] # [BM25, faiss]
+RELEVANCE_SCORE_THRESHOLD = 0.90  # Ignore context documents if they do not meet at least this threshold
 ENABLE_LANGCHAIN_CACHE = False
 
 USER_AGENTS = [
