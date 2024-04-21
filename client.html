@@ -157,10 +157,6 @@
             });
 
             const data = await res.json();
-            timeout = setTimeout(() => {
-                appendMessage('Processing timed out. Try again.', 'system');
-            }, 120000); // 2 minutes timeout
-
             pollForResult(data.prompt_id);
         }
 
@@ -231,36 +227,27 @@
                 appendMessage("It's taking longer than expected. Please wait...", 'system');
             }, 60000); // 60 seconds
 
-            const totalProcessingTimeout = setTimeout(() => {
-                if (status === '' || status === 'IN_QUEUE' || status === 'IN_PROGRESS') {
-                    appendMessage('Processing timed out. Try again.', 'system');
-                    isProcessingTimeoutReached = true;
-                }
-            }, 120000); // 120 seconds
-
             while (!isProcessingTimeoutReached) {
                 await new Promise(r => setTimeout(r, 1000)); // Poll every second
-                const res = await fetch('http://localhost:5000/result?prompt_id=' + promptId);
+                const res = await fetch(`http://localhost:5000/result?prompt_id=${promptId}`);
                 const data = await res.json();
                 status = data.status;
 
-                if (status === 'SUCCESS') {
-                    clearTimeout(processingMessageTimeout); 
-                    clearTimeout(totalProcessingTimeout);
-                    const formattedData = formatResponse(data);
-                    displayResult(formattedData);
-                    break; // Exit the loop on success
-                } else if (status === 'FAILED') {
+                if (status === 'SUCCESS' || status === 'FAILED') {
                     clearTimeout(processingMessageTimeout);
-                    clearTimeout(totalProcessingTimeout);
-                    appendMessage('Failed to process.', 'system');
-                    break; // Exit the loop on failure
+                    if (status === 'SUCCESS') {
+                        const formattedData = formatResponse(data);
+                        displayResult(formattedData);
+                    } else {
+                        appendMessage('Failed to process.', 'system');
+                    }
+                    break; // Exit the loop on success or failure
                 }
-                // If status is 'IN_QUEUE' or 'IN_PROGRESS', the loop will continue
             }
 
-            // Check if the loop exited due to a timeout
+            // If the loop exited due to a timeout, but the status was not SUCCESS or FAILED
             if (status !== 'SUCCESS' && status !== 'FAILED') {
+                clearTimeout(processingMessageTimeout);
                 appendMessage('Failed to process: Timeout reached.', 'system');
             }
         }

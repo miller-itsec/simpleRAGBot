@@ -89,14 +89,14 @@ EMBEDDINGS_MODEL = "sentence-transformers/all-mpnet-base-v2"
 # Setting e.g. 'lambda_mult' to 0.5 gives equal importance to both, with a lower value corresponding to maximum diversity.
 RETRIEVER_FAISS_SEARCH_TYPE = "mmr"
 RETRIEVER_FAISS_SEARCH_ARGS = {'k': 50, 'lambda_mult': 0.65}
-MAX_OUTPUT_LENGTH = 256
+MAX_OUTPUT_LENGTH = 512
 VECTOR_USE_CACHE = True
 VECTOR_CACHE_TTL = 60  # Enforce vector db rebuild, if too old (in minutes)
 VECTOR_STORAGE_FOLDER = "db_vectors"
 VECTOR_INDEX_FILE = os.path.join(VECTOR_STORAGE_FOLDER, "index.faiss")
 BM25_CACHE_FILE = "bm25_index.pkl"
 ENSEMBLE_RETRIEVER_WEIGHTS = [0.25, 0.75] # [BM25, faiss]
-RELEVANCE_SCORE_THRESHOLD = 0.90  # Ignore context documents if they do not meet at least this threshold
+RELEVANCE_SCORE_THRESHOLD = 0.95  # Ignore context documents if they do not meet at least this threshold
 ENABLE_LANGCHAIN_CACHE = False
 
 USER_AGENTS = [

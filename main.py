@@ -344,7 +344,7 @@ def main():
             flask_thread.join()
     except KeyboardInterrupt:
         pass
-    time.sleep(5)
+    time.sleep(2)
     logger.info("Goodbye")
     os._exit(0)
 
