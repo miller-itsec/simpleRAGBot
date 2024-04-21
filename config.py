@@ -44,7 +44,7 @@ CUSTOM_URLS = ["https://www.opswat.com/products/metadefender/sandbox",
                 "https://www.filescan.io/api/docs",
                 "https://www.filescan.io/help/faq"]
 PERFORM_CUSTOM_GOOGLE_QUERIES = True
-CUSTOM_GOOGLE_QUERIES = ["MetaDefender Sandbox", "OPSWAT Products", "OPSWAT Blog", "OPSWAT"]
+CUSTOM_GOOGLE_QUERIES = ["MetaDefender Sandbox"]
 CHUNK_SIZE = 1024
 CHUNK_OVERLAP = 128
 # Delete small files in the CUSTOM_* directories

@@ -173,7 +173,7 @@ async def load_and_transform_url(loader, url, delay=0.0):
         html_content = await loader.scrape_playwright(url)
         html_content = strip_html(html_content)
         html_content = re.sub(r'[\s]+', ' ', html_content)  # Remove excessive whitespace
-        logger.info(f"Extracted Text from URL:\n{html_content[:500]}...")  # Print the first 500 characters
+        logger.debug(f"Extracted Text from URL:\n{html_content[:500]}...")  # Print the first 500 characters
         return Document(page_content=html_content, metadata={"source": url})
     except Exception as e:
         logger.exception("Failed to load and transform URL: " + url, exc_info=e)

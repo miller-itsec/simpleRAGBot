@@ -327,7 +327,7 @@ def main():
     flask_thread = None
 
     if ENABLE_WEBSERVER:
-        flask_thread = Thread(target=run_flask_app, args=(get_app_name(), get_app_version(), model_name, rag_chain))
+        flask_thread = Thread(target=run_flask_app, args=(get_app_name(), get_app_version(), model, model_name, rag_chain))
         flask_thread.start()
 
     if ENABLE_COMMANDLINE:
@@ -335,15 +335,18 @@ def main():
         cli_thread.start()
 
     # Wait for threads to complete or handle keyboard interrupt for graceful shutdown
-    if cli_thread is not None:
-        logger.info("Waiting for the commandline to quit")
-        cli_thread.join()
-    if flask_thread is not None:
-        logger.info("Waiting for the webserver to quit")
-        flask_thread.join()
+    try:
+        if cli_thread is not None:
+            logger.info("Waiting for the commandline to quit")
+            cli_thread.join()
+        if flask_thread is not None:
+            logger.info("Waiting for the webserver to quit")
+            flask_thread.join()
+    except KeyboardInterrupt:
+        pass
     time.sleep(5)
     logger.info("Goodbye")
-    sys.exit(0)
+    os._exit(0)
 
 
 @contextlib.contextmanager
