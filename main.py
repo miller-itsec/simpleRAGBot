@@ -58,6 +58,7 @@ from langchain.chains import LLMChain
 from transformers import pipeline, BartTokenizer, BartForConditionalGeneration
 
 from server import run_flask_app, abort_flask_app
+from training import generate_training_data
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -232,6 +233,12 @@ def load_custom_data():
 
             # Clean up the metadata "source" fields in the context to show only the relative pathway
             prepare_documents(all_docs)
+
+            # Use only if fine-tuning the LLM model is desired
+            if GENERATE_TRAINING_DATA:
+                generate_training_data(all_docs)
+                logger.info("Completed training data generation. Please fine-tune the model and disable 'GENERATE_TRAINING_DATA'")
+                sys.exit(0)
 
             # Split text
             logger.info(f"Splitting documents (chunk size: {CHUNK_SIZE}, overlap: {CHUNK_OVERLAP}) ...")

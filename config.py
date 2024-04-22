@@ -117,3 +117,38 @@ USER_AGENTS = [
     'Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.152 Mobile Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
 ]
+
+GENERATE_TRAINING_DATA = True
+TRAINING_DATA_PROMPT = """
+Given the detailed content provided below, identify three key aspects or sections and provide a detailed summary for each. These summaries should include specific facts, data points, and definitions used in the text. For each detailed summary, imagine you are designing a training exercise for an advanced AI. Treat each detailed summary as the desired outcome (output) of separate exercises. For each detailed summary, generate:
+1. A question (input) that the AI should answer to arrive at this output.
+2. A specific instruction that the AI should follow to ensure it addresses the question correctly and effectively.
+
+Content: {content}
+
+Please provide your output in the following JSON format for each section, and ensure the summary includes exact content from the original text:
+
+```
+[
+{{
+"instruction": "<instruction_1>",
+"input": "<input_1>",
+"output": "<detailed_summary_1>"
+}},
+{{
+"instruction": "<instruction_2>",
+"input": "<input_2>",
+"output": "<detailed_summary_2>"
+}},
+{{
+"instruction": "<instruction_3>",
+"input": "<input_3>",
+"output": "<detailed_summary_3>"
+}}
+]
+```
+The summaries must include specific details such as data values, factual content, and precise definitions from the text. Please replace `<instruction_n>`, `<input_n>`, and `<detailed_summary_n>` with text that reflects these requirements.
+"""
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-3.5-turbo-16k')
+API_REQUEST_TIMEOUT = int(os.getenv('API_REQUEST_TIMEOUT', 20))  # in seconds
