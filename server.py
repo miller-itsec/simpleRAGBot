@@ -84,7 +84,7 @@ def run_flask_app(app_name, app_version, model, model_name, rag_chain):
     global server
     app = Flask(__name__)
     CORS(app)
-    limiter = Limiter(app, default_limits=[WEBSERVER_RATE_LIMIT])
+    limiter = Limiter(app, key_func=get_remote_address, default_limits=[WEBSERVER_RATE_LIMIT])
 
     @app.route('/prompt', methods=['POST'])
     @limiter.limit(WEBSERVER_RATE_LIMIT)

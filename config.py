@@ -51,7 +51,8 @@ CHUNK_OVERLAP = 128
 CLEAN_SMALL_CUSTOM_DOCUMENTS = False
 CLEAN_SMALL_CUSTOM_DOCUMENTS_THRESHOLD_BYTES = 1024
 SUMMARIZE_LARGE_DOCUMENTS = True
-SUMMARIZE_LARGE_DOCUMENTS_THRESHOLD = 10 * 1024  # Summarize any document using facebook/bart-large-cnn
+SUMMARIZE_LARGE_DOCUMENTS_THRESHOLD = 10 * 1024  # Summarize any document above this threshold
+SUMMARIZE_MODEL = "facebook/bart-large-cnn"
 SKIP_URL_SUMMARY = True
 CUSTOM_URL_SUMMARY_STORAGE = os.path.join(current_directory, "custom_urls")
 SUMMARIZE_USE_CACHE = True
@@ -78,6 +79,11 @@ If the question is unrelated to the product, ask for a product-related question 
 
 [/INST]
 """
+PROMPT_TOKEN_START = "[INST]"
+PROMPT_TOKEN_END = "[/INST]"
+RESPONSE_STRIP_CHUNKS = [
+    "\n### \n",  # Original text to strip, add more items as needed
+]
 
 # Set up directories, models and search parameters (advanced)
 MODEL_DIR = "E:\\LLM\\models"

@@ -116,11 +116,11 @@ def load_bm25_index():
 
 # Processes documents by summarizing content that exceeds a specified size threshold, using the BART model for summarization.
 # This function also implements a caching system, storing summaries on disk to avoid redundant processing.
-def prepare_documents(all_docs, summarize_large_documents=SUMMARIZE_LARGE_DOCUMENTS, use_cache=SUMMARIZE_USE_CACHE):
+def prepare_documents(all_docs, summarize_large_documents=SUMMARIZE_LARGE_DOCUMENTS, summarize_model=SUMMARIZE_MODEL, use_cache=SUMMARIZE_USE_CACHE):
     if summarize_large_documents:
         os.makedirs(CUSTOM_URL_SUMMARY_STORAGE, exist_ok=True)
-        tokenizer = BartTokenizer.from_pretrained('facebook/bart-large-cnn')
-        model = BartForConditionalGeneration.from_pretrained('facebook/bart-large-cnn')
+        tokenizer = BartTokenizer.from_pretrained(summarize_model)
+        model = BartForConditionalGeneration.from_pretrained(summarize_model)
 
     def summarize_text(text):
         # Tokenize the input text

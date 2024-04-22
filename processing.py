@@ -97,8 +97,16 @@ def invoke_rag(prompt, rag_chain):
     if isinstance(response, str):
         response_json['text'] = response
     response_json = convert_to_dict(response)
-    response_json['text'] = re.sub(r'\[INST].*?\[/INST]', '', response_json.get('text', ''), flags=re.DOTALL)
-    response_json['text'] = response_json['text'].replace("\n### \n", "", 1).strip()
+    response_json['text'] = re.sub(
+        rf'{re.escape(PROMPT_TOKEN_START)}.*?{re.escape(PROMPT_TOKEN_END)}',
+        '',
+        response_json.get('text', ''),
+        flags=re.DOTALL
+    )
+    text_content = response_json.get('text', '')
+    for chunk in RESPONSE_STRIP_CHUNKS:
+        text_content = text_content.replace(chunk, "", 1)  # Replaces the first occurrence of each chunk
+    response_json['text'] = text_content.strip()
     response_json = convert_to_serializable(response_json)
     return json.dumps(response_json, indent=4, cls=NumpyEncoder)
 
